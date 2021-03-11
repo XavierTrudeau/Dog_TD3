@@ -2,12 +2,12 @@
  Twin Delayed DDPG train a 4 legged dog to walk/run
 
 # Dependencies
- Python 3.8
- Tensorflow 2.0
- numpy
- pynput
- gym
- Vortex Studio 2020b (2020.5.0.133) 
+ - Python 3.8
+ 	- Tensorflow 2.0
+ 	- numpy
+ 	- pynput
+ 	- gym
+ - Vortex Studio 2020b (2020.5.0.133) 
 
 # How to use
  1. Open Vortex Studio 2020b

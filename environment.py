@@ -8,6 +8,7 @@ import Vortex as VxSim
 import vxatp3 as vxatp
 import numpy as np
 from gym import spaces
+from math import pi
 
 
 
@@ -23,6 +24,8 @@ HORIZONTAL_PENALTY = 0.35
 
 X_AXIS_REWARD = 2
 Y_AXIS_PENALTY = 1
+Z_AXIS_REWARD = 2
+
 SURVIVAL_REWARD = 0.1
 ROTATION_PENALTY = 1
 COLLISION_PENALTY = 1
@@ -70,6 +73,7 @@ class env():
         self.mechanism = None
         self.interface = None
         self.reward = 0
+        self.max_height = 0
 
         # Switch to Editing
         vxatp.VxATPUtils.requestApplicationModeChangeAndWait(self.application, VxSim.kModeEditing)
@@ -133,10 +137,22 @@ class env():
 
 
         velocity = self.interface.getOutputContainer()[1].value
+        transform = VxSim.getTranslation(self.interface.getOutputContainer()[0].value)
 
-        reward += max(0,velocity.x) * X_AXIS_REWARD
-        #reward += - transform.y * Y_AXIS_PENALTY
-        #reward += - (abs(obs[1]) + abs(obs[2]) + abs(obs[3])) * ROTATION_PENALTY
+        #***** This block rewards jump height *****
+        if self.current_step == 0:
+            self.start_height = transform.z
+
+        if transform.z > self.max_height:
+            self.max_height = transform.z
+
+        reward += (-self.start_height + self.max_height) * Z_AXIS_REWARD
+        #****************************
+
+
+        #***** This Block rewards forward Velocity *****
+        #reward += max(0,velocity.x) * X_AXIS_REWARD
+        #****************************
 
 
         self.current_step += 1
@@ -153,13 +169,13 @@ class env():
         output = []
         for index, position in enumerate(self.interface.getOutputContainer()):
             if index >= 3:
-                output.append(position.value)
+                output.append(position.value/(2*pi))
 
         output.append(transform.z)
 
-        output.append(rotation.x)
-        output.append(rotation.y)
-        output.append(rotation.z)
+        output.append(rotation.x/(2*pi))
+        output.append(rotation.y/(2*pi))
+        output.append(rotation.z/(2*pi))
 
         output.append(velocity.x)
         output.append(velocity.y)
